@@ -32,7 +32,7 @@ public class BasketViewModelService : IBasketViewModelService
 
         if (basket == null)
         {
-            return await CreateBasketForUser(userName);
+            // return await CreateBasketForUser(userName);
         }
         var viewModel = await Map(basket);
         return viewModel;

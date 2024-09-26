@@ -9,6 +9,7 @@
 		<PackageReference Include="Microsoft.Extensions.Identity.Core" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Configuration" />
 		<PackageReference Include="System.Net.Http.Json" />
+		<PackageReference Include="Unleash.Client" />
 	</ItemGroup>
 
 	<ItemGroup>

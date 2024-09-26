@@ -18,6 +18,7 @@ using Microsoft.eShopWeb.Web;
 using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Unleash;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddConsole();
@@ -41,6 +42,19 @@ else{
         options.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure());
     });
 }
+
+var settings = new UnleashSettings()
+{
+    AppName = "dotnet-tutorial",
+    UnleashApi = new Uri("http://localhost:4242/api/"),
+    CustomHttpHeaders = new Dictionary<string, string>()
+    {
+        {"Authorization","default:development.unleash-insecure-api-token" }
+    }
+};
+
+var unleash = new DefaultUnleash(settings);
+builder.Services.AddSingleton<IUnleash>(c => unleash);
 
 builder.Services.AddCookieSettings();
 

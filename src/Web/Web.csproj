@@ -33,7 +33,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>     
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />     
+    <PackageReference Include="Unleash.Client" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\fonts\" />
