@@ -8,6 +8,8 @@
   <ItemGroup>
     <PackageReference Include="BlazorInputFile" />
     <PackageReference Include="FluentValidation" />
+    <PackageReference Include="MrAdvice" />
+    <PackageReference Include="ToggleCoreLibrary" />
     <PackageReference Include="Unleash.Client" />
   </ItemGroup>
 

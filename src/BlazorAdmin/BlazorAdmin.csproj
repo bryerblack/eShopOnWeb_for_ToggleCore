@@ -8,7 +8,9 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" />
 		<PackageReference Include="Microsoft.Extensions.Identity.Core" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Configuration" />
+		<PackageReference Include="MrAdvice" />
 		<PackageReference Include="System.Net.Http.Json" />
+		<PackageReference Include="ToggleCoreLibrary" />
 		<PackageReference Include="Unleash.Client" />
 	</ItemGroup>
 

@@ -32,8 +32,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>     
+    </PackageReference>
+    <PackageReference Include="MrAdvice" />     
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />     
+    <PackageReference Include="ToggleCoreLibrary" />     
     <PackageReference Include="Unleash.Client" />
   </ItemGroup>
   <ItemGroup>

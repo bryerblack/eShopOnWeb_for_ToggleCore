@@ -18,6 +18,7 @@ using Microsoft.eShopWeb.Web;
 using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using ToggleCoreLibrary.Operations;
 using Unleash;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,18 +44,20 @@ else{
     });
 }
 
-var settings = new UnleashSettings()
-{
-    AppName = "dotnet-tutorial",
-    UnleashApi = new Uri("http://localhost:4242/api/"),
-    CustomHttpHeaders = new Dictionary<string, string>()
-    {
-        {"Authorization","default:development.unleash-insecure-api-token" }
-    }
-};
+//var settings = new UnleashSettings()
+//{
+//    AppName = "dotnet-tutorial",
+//    UnleashApi = new Uri("http://localhost:4242/api/"),
+//    CustomHttpHeaders = new Dictionary<string, string>()
+//    {
+//        {"Authorization","default:development.unleash-insecure-api-token" }
+//    }
+//};
 
-var unleash = new DefaultUnleash(settings);
-builder.Services.AddSingleton<IUnleash>(c => unleash);
+//var unleash = new DefaultUnleash(settings);
+//builder.Services.AddSingleton<IUnleash>(c => unleash);
+
+FeatureToggle.SetFeatureToggleMapper(new FTDBMapper());
 
 builder.Services.AddCookieSettings();
 

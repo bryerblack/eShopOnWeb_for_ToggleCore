@@ -11,6 +11,7 @@ using Microsoft.eShopWeb.ApplicationCore.Specifications;
 using Microsoft.eShopWeb.Web.Pages;
 using Microsoft.eShopWeb.Web.ViewModels;
 using Microsoft.Extensions.Logging;
+using ToggleCoreLibrary.Operations;
 using Unleash;
 
 namespace Microsoft.eShopWeb.Web.Services;
@@ -56,44 +57,51 @@ public class CatalogViewModelService : ICatalogViewModelService
         var itemsOnPage = await _itemRepository.ListAsync(filterPaginatedSpecification);
         var totalItems = await _itemRepository.CountAsync(filterSpecification);
 
-        if (_unleash.IsEnabled("FT0001") && totalItems%6==0)
-        {
-            return await NewRouteAsync(pageIndex, brandId, typeId);
-        }
-        if (_unleash.IsEnabled("FT0002") && totalItems <= 6)
-        {
-            return await NewRouteAsync(pageIndex, 3, brandId, typeId);
-        }
+        //if (_unleash.IsEnabled("FT0001") && totalItems%6==0)
+        //{
+        //    return await NewRouteAsync(pageIndex, brandId, typeId);
+        //}
+        //if (_unleash.IsEnabled("FT0002") && totalItems <= 6)
+        //{
+        //    return await NewRouteAsync(pageIndex, 3, brandId, typeId);
+        //}
+        CatalogIndexViewModel vm = null;
 
-        var vm = new CatalogIndexViewModel()
+        NewRouteAsync(ref vm, pageIndex, brandId, typeId);
+        NewRouteAsync(ref vm, pageIndex, 3, brandId, typeId);
+
+        if (vm == null) 
         {
-            CatalogItems = itemsOnPage.Select(i => new CatalogItemViewModel()
+            vm = new CatalogIndexViewModel()
             {
-                Id = i.Id,
-                Name = i.Name,
-                PictureUri = _uriComposer.ComposePicUri(i.PictureUri),
-                Price = i.Price
-            }).ToList(),
-            Brands = (await GetBrands()).ToList(),
-            Types = (await GetTypes()).ToList(),
-            BrandFilterApplied = brandId ?? 0,
-            TypesFilterApplied = typeId ?? 0,
-            PaginationInfo = new PaginationInfoViewModel()
-            {
-                ActualPage = pageIndex,
-                ItemsPerPage = itemsOnPage.Count,
-                TotalItems = totalItems,
-                TotalPages = int.Parse(Math.Ceiling(((decimal)totalItems / itemsPage)).ToString())
-            }
-        };
+                CatalogItems = itemsOnPage.Select(i => new CatalogItemViewModel()
+                {
+                    Id = i.Id,
+                    Name = i.Name,
+                    PictureUri = _uriComposer.ComposePicUri(i.PictureUri),
+                    Price = i.Price
+                }).ToList(),
+                Brands = (GetBrands()).ToList(),
+                Types = (GetTypes()).ToList(),
+                BrandFilterApplied = brandId ?? 0,
+                TypesFilterApplied = typeId ?? 0,
+                PaginationInfo = new PaginationInfoViewModel()
+                {
+                    ActualPage = pageIndex,
+                    ItemsPerPage = itemsOnPage.Count,
+                    TotalItems = totalItems,
+                    TotalPages = int.Parse(Math.Ceiling(((decimal)totalItems / itemsPage)).ToString())
+                }
+            };
 
-        vm.PaginationInfo.Next = (vm.PaginationInfo.ActualPage == vm.PaginationInfo.TotalPages - 1) ? "is-disabled" : "";
-        vm.PaginationInfo.Previous = (vm.PaginationInfo.ActualPage == 0) ? "is-disabled" : "";
-
+            vm.PaginationInfo.Next = (vm.PaginationInfo.ActualPage == vm.PaginationInfo.TotalPages - 1) ? "is-disabled" : "";
+            vm.PaginationInfo.Previous = (vm.PaginationInfo.ActualPage == 0) ? "is-disabled" : "";
+        }
         return vm;
     }
 
-    private async Task<CatalogIndexViewModel> NewRouteAsync(int pageIndex, int itemsPage, int? brandId, int? typeId)
+    [FeatureToggle("FT0002")]
+    private void NewRouteAsync(ref CatalogIndexViewModel vm, int pageIndex, int itemsPage, int? brandId, int? typeId)
     {
         _logger.LogInformation("GetCatalogItems called.");
 
@@ -102,10 +110,17 @@ public class CatalogViewModelService : ICatalogViewModelService
             new CatalogFilterPaginatedSpecification(itemsPage * pageIndex, itemsPage, brandId, typeId);
 
         // the implementation below using ForEach and Count. We need a List.
-        var itemsOnPage = await _itemRepository.ListAsync(filterPaginatedSpecification);
-        var totalItems = await _itemRepository.CountAsync(filterSpecification);
+        var task1 = _itemRepository.ListAsync(filterPaginatedSpecification);
+        var task2 = _itemRepository.CountAsync(filterSpecification);
+        task1.Wait();
+        task2.Wait();
+        var itemsOnPage = task1.Result;
+        var totalItems = task2.Result;
 
-        var vm = new CatalogIndexViewModel()
+        if (totalItems % 6 != 0)
+            return;
+
+        vm = new CatalogIndexViewModel()
         {
             CatalogItems = itemsOnPage.Select(i => new CatalogItemViewModel()
             {
@@ -114,8 +129,8 @@ public class CatalogViewModelService : ICatalogViewModelService
                 PictureUri = _uriComposer.ComposePicUri(i.PictureUri),
                 Price = i.Price
             }).ToList(),
-            Brands = (await GetBrands()).ToList(),
-            Types = (await GetTypes()).ToList(),
+            Brands = ( GetBrands()).ToList(),
+            Types = (GetTypes()).ToList(),
             BrandFilterApplied = brandId ?? 0,
             TypesFilterApplied = typeId ?? 0,
             PaginationInfo = new PaginationInfoViewModel()
@@ -129,11 +144,10 @@ public class CatalogViewModelService : ICatalogViewModelService
 
         vm.PaginationInfo.Next = (vm.PaginationInfo.ActualPage == vm.PaginationInfo.TotalPages - 1) ? "is-disabled" : "";
         vm.PaginationInfo.Previous = (vm.PaginationInfo.ActualPage == 0) ? "is-disabled" : "";
-
-        return vm;
     }
 
-    private async Task<CatalogIndexViewModel> NewRouteAsync(int pageIndex, int? brandId, int? typeId)
+    [FeatureToggle("FT0001")]
+    private void NewRouteAsync(ref CatalogIndexViewModel vm, int pageIndex, int? brandId, int? typeId)
     {
         _logger.LogInformation("GetCatalogItems called.");
 
@@ -143,10 +157,17 @@ public class CatalogViewModelService : ICatalogViewModelService
             new CatalogFilterPaginatedSpecification(itemsPage * pageIndex, itemsPage, brandId, typeId);
 
         // the implementation below using ForEach and Count. We need a List.
-        var itemsOnPage = await _itemRepository.ListAsync(filterPaginatedSpecification);
-        var totalItems = await _itemRepository.CountAsync(filterSpecification);
+        var task1 = _itemRepository.ListAsync(filterPaginatedSpecification);
+        var task2 = _itemRepository.CountAsync(filterSpecification);
+        task1.Wait();
+        task2.Wait();
+        var itemsOnPage = task1.Result;
+        var totalItems = task2.Result;
 
-        var vm = new CatalogIndexViewModel()
+        if (totalItems > 6)
+            return;
+
+        vm = new CatalogIndexViewModel()
         {
             CatalogItems = itemsOnPage.Select(i => new CatalogItemViewModel()
             {
@@ -155,8 +176,8 @@ public class CatalogViewModelService : ICatalogViewModelService
                 PictureUri = _uriComposer.ComposePicUri(i.PictureUri),
                 Price = i.Price
             }).ToList(),
-            Brands = (await GetBrands()).ToList(),
-            Types = (await GetTypes()).ToList(),
+            Brands = (GetBrands()).ToList(),
+            Types = (GetTypes()).ToList(),
             BrandFilterApplied = brandId ?? 0,
             TypesFilterApplied = typeId ?? 0,
             PaginationInfo = new PaginationInfoViewModel()
@@ -170,16 +191,14 @@ public class CatalogViewModelService : ICatalogViewModelService
 
         vm.PaginationInfo.Next = (vm.PaginationInfo.ActualPage == vm.PaginationInfo.TotalPages - 1) ? "is-disabled" : "";
         vm.PaginationInfo.Previous = (vm.PaginationInfo.ActualPage == 0) ? "is-disabled" : "";
-
-        return vm;
     }
 
-
-
-    public async Task<IEnumerable<SelectListItem>> GetBrands()
+    public IEnumerable<SelectListItem> GetBrands()
     {
         _logger.LogInformation("GetBrands called.");
-        var brands = await _brandRepository.ListAsync();
+        var task = _brandRepository.ListAsync();
+        task.Wait();
+        var brands = task.Result;
 
         var items = brands
             .Select(brand => new SelectListItem() { Value = brand.Id.ToString(), Text = brand.Brand })
@@ -192,10 +211,12 @@ public class CatalogViewModelService : ICatalogViewModelService
         return items;
     }
 
-    public async Task<IEnumerable<SelectListItem>> GetTypes()
+    public IEnumerable<SelectListItem> GetTypes()
     {
         _logger.LogInformation("GetTypes called.");
-        var types = await _typeRepository.ListAsync();
+        var task = _typeRepository.ListAsync();
+        task.Wait();
+        var types = task.Result;
 
         var items = types
             .Select(type => new SelectListItem() { Value = type.Id.ToString(), Text = type.Type })

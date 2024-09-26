@@ -19,13 +19,14 @@ public class CachedCatalogViewModelService : ICatalogViewModelService
         _catalogViewModelService = catalogViewModelService;
     }
 
-    public async Task<IEnumerable<SelectListItem>> GetBrands()
+    public IEnumerable<SelectListItem> GetBrands()
     {
-        return (await _cache.GetOrCreateAsync(CacheHelpers.GenerateBrandsCacheKey(), async entry =>
+        var task = _cache.GetOrCreateAsync(CacheHelpers.GenerateBrandsCacheKey(), async entry =>
                 {
                     entry.SlidingExpiration = CacheHelpers.DefaultCacheDuration;
-                    return await _catalogViewModelService.GetBrands();
-                })) ?? new List<SelectListItem>();
+                    return _catalogViewModelService.GetBrands();
+                });
+        return task.Result ?? new List<SelectListItem>();
     }
 
     public async Task<CatalogIndexViewModel> GetCatalogItems(int pageIndex, int itemsPage, int? brandId, int? typeId)
@@ -39,12 +40,13 @@ public class CachedCatalogViewModelService : ICatalogViewModelService
         })) ?? new CatalogIndexViewModel();
     }
 
-    public async Task<IEnumerable<SelectListItem>> GetTypes()
+    public IEnumerable<SelectListItem> GetTypes()
     {
-        return (await _cache.GetOrCreateAsync(CacheHelpers.GenerateTypesCacheKey(), async entry =>
+        var task = _cache.GetOrCreateAsync(CacheHelpers.GenerateTypesCacheKey(), async entry =>
         {
             entry.SlidingExpiration = CacheHelpers.DefaultCacheDuration;
-            return await _catalogViewModelService.GetTypes();
-        })) ?? new List<SelectListItem>();
+            return _catalogViewModelService.GetTypes();
+        });
+        return task.Result ?? new List<SelectListItem>();
     }
 }
