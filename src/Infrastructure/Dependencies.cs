@@ -3,6 +3,7 @@ using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ToggleCoreLibrary.Operations;
 
 namespace Microsoft.eShopWeb.Infrastructure;
 
@@ -10,6 +11,7 @@ public static class Dependencies
 {
     public static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
     {
+        FeatureToggleMapperHandler.SetMapper(new FTDBMapper());
         bool useOnlyInMemoryDatabase = false;
         if (configuration["UseOnlyInMemoryDatabase"] != null)
         {
@@ -23,6 +25,7 @@ public static class Dependencies
          
             services.AddDbContext<AppIdentityDbContext>(options =>
                 options.UseInMemoryDatabase("Identity"));
+
         }
         else
         {

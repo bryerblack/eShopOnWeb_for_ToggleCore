@@ -27,27 +27,24 @@ public class CatalogViewModelService : ICatalogViewModelService
     private readonly IRepository<CatalogBrand> _brandRepository;
     private readonly IRepository<CatalogType> _typeRepository;
     private readonly IUriComposer _uriComposer;
-    private readonly IUnleash _unleash;
 
     public CatalogViewModelService(
         ILoggerFactory loggerFactory,
         IRepository<CatalogItem> itemRepository,
         IRepository<CatalogBrand> brandRepository,
         IRepository<CatalogType> typeRepository,
-        IUriComposer uriComposer,
-        IUnleash unleash)
+        IUriComposer uriComposer)
     {
         _logger = loggerFactory.CreateLogger<CatalogViewModelService>();
         _itemRepository = itemRepository;
         _brandRepository = brandRepository;
         _typeRepository = typeRepository;
         _uriComposer = uriComposer;
-        _unleash = unleash;
     }
 
     public async Task<CatalogIndexViewModel> GetCatalogItems(int pageIndex, int itemsPage, int? brandId, int? typeId)
     {
-        _logger.LogInformation("GetCatalogItems called.");
+        _logger.LogInformation("GetCatalogItems base called.");
 
         var filterSpecification = new CatalogFilterSpecification(brandId, typeId);
         var filterPaginatedSpecification =
@@ -103,7 +100,7 @@ public class CatalogViewModelService : ICatalogViewModelService
     [FeatureToggle("FT0002")]
     private void NewRouteAsync(ref CatalogIndexViewModel vm, int pageIndex, int itemsPage, int? brandId, int? typeId)
     {
-        _logger.LogInformation("GetCatalogItems called.");
+        _logger.LogInformation("GetCatalogItems 2 called.");
 
         var filterSpecification = new CatalogFilterSpecification(brandId, typeId);
         var filterPaginatedSpecification =
@@ -149,7 +146,7 @@ public class CatalogViewModelService : ICatalogViewModelService
     [FeatureToggle("FT0001")]
     private void NewRouteAsync(ref CatalogIndexViewModel vm, int pageIndex, int? brandId, int? typeId)
     {
-        _logger.LogInformation("GetCatalogItems called.");
+        _logger.LogInformation("GetCatalogItems 1 called.");
 
         int itemsPage = 6;
         var filterSpecification = new CatalogFilterSpecification(brandId, typeId);

@@ -57,8 +57,6 @@ else{
 //var unleash = new DefaultUnleash(settings);
 //builder.Services.AddSingleton<IUnleash>(c => unleash);
 
-FeatureToggle.SetFeatureToggleMapper(new FTDBMapper());
-
 builder.Services.AddCookieSettings();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -206,7 +204,6 @@ app.UseRouting();
 app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.MapControllerRoute("default", "{controller:slugify=Home}/{action:slugify=Index}/{id?}");
 app.MapRazorPages();
